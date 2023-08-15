@@ -2,3 +2,5 @@ tqdm
 
 torch
 torchvision
+
+detectron2 @ git+https://github.com/facebookresearch/detectron2@main

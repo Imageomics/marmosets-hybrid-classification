@@ -1,9 +1,13 @@
 tqdm
 
 pandas
+scipy
+scikit-image
 
 torch
 torchvision
+
+imutils
 
 cython
 Cmake

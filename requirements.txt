@@ -1,6 +1,10 @@
 tqdm
 
+pandas
+
 torch
 torchvision
 
+cython
+Cmake
 detectron2 @ git+https://github.com/facebookresearch/detectron2@main

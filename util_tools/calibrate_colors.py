@@ -62,7 +62,22 @@ def calibrate_image(ref_image, tgt_image, model_path):
         for i in range(len(full_tgt_channels)) ]
     
     calibrated_image = cv2.merge(calibrated_channels)
+
+    return calibrated_image
+
+def calibrate_image_alt(ref_image, tgt_image, model_path):
     """
+    Assumes the color cards are in the same orientation
+    """
+
+    [ref_card, tgt_card] = get_color_card([ref_image, tgt_image], model_path)
+
+    tgt_card = cv2.resize(tgt_card, ref_card.shape[:2], interpolation= cv2.INTER_LINEAR)
+
+    ref_channels = list(cv2.split(ref_card))
+    tgt_channels = list(cv2.split(tgt_card))
+    assert len(ref_channels) == len(tgt_channels), "# of reference image channels must match # of target image channels"
+
     histograms = [ np.histogram(x.flatten(), 256, [0, 256])[0] for x in ref_channels + tgt_channels ]
 
     norm_histograms = [ x.cumsum() / float(x.cumsum().max()) for x in histograms ]
@@ -74,8 +89,6 @@ def calibrate_image(ref_image, tgt_image, model_path):
 
     calibrated_image = cv2.merge(calibrated_channels)
     calibrated_image = cv2.convertScaleAbs(calibrated_image)
-    """
 
     return calibrated_image
-
 

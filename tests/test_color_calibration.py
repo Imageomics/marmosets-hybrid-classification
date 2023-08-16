@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-from util_tools.calibrate_colors import get_color_card, calibrate_image
+from util_tools.calibrate_colors import get_color_card, calibrate_image, calibrate_image_alt
 
 DETECTRON_MODEL_PATH = "data/model_weights/palette_detector.pth"
 EX_IMAGE_1 = "data/examples/butterfly_1.jpg"
@@ -19,3 +19,10 @@ def test_calibrate_images():
 
     test = calibrate_image(ex1, ex2, DETECTRON_MODEL_PATH)
     cv2.imwrite("tmp/calibrated.png", np.array(test, dtype=np.uint8))
+
+def test_calibrate_images_alt():
+    ex1 = cv2.imread(EX_IMAGE_1, cv2.IMREAD_COLOR)
+    ex2 = cv2.imread(EX_IMAGE_2, cv2.IMREAD_COLOR)
+
+    test = calibrate_image_alt(ex1, ex2, DETECTRON_MODEL_PATH)
+    cv2.imwrite("tmp/calibrated_alt.png", np.array(test, dtype=np.uint8))

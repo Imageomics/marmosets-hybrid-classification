@@ -4,3 +4,6 @@
 [submodule "externals/color_correction"]
 	path = externals/color_correction
 	url = https://github.com/dazzafact/image_color_correction.git
+[submodule "externals/pytorch_grad_cam"]
+	path = externals/pytorch_grad_cam
+	url = https://github.com/jacobgil/pytorch-grad-cam.git

@@ -8,31 +8,12 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 import torchvision.models as tv_models
-import torchvision.transforms as T
 
 from datasets import MarmosetCroppedDataset
 from util_tools.general import to_numpy
 from util_tools.evaluation import calculate_accuracy, create_accuracy_column_chart, create_confusion_matrix
+from util_tools.transforms import train_transforms, test_transforms
 
-def train_transforms():
-    return T.Compose([
-        T.Resize((224, 224)),
-        T.RandomVerticalFlip(),
-        T.RandomHorizontalFlip(),
-        T.RandomRotation(90),
-        T.ColorJitter(brightness=0.1, contrast=0.1, saturation=0.1, hue=0),
-        T.ToTensor(),
-        T.Normalize(mean=[0.485, 0.456, 0.406], #TODO: Update this for the marmosets dataset
-                    std=[0.229, 0.224, 0.225])
-    ])
-
-def test_transforms():
-    return T.Compose([
-        T.Resize((224, 224)),
-        T.ToTensor(),
-        T.Normalize(mean=[0.485, 0.456, 0.406], #TODO: Update this for the marmosets dataset
-                    std=[0.229, 0.224, 0.225])
-    ])
 
 def save_model(state, path):
     torch.save(state, path)

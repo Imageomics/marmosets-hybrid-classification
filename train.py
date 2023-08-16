@@ -83,11 +83,11 @@ def train(train_dl, val_dl, model, opts):
 
             acc = calculate_accuracy(all_preds, all_lbls)
             print(f"Epoch ({epoch+1}) | Validation Loss: {round(total_loss, 4)} | Validation Accuracy: {round(acc, 4) * 100}%")
-            per_class_bar_chart_im = create_accuracy_column_chart(all_preds, all_lbls)
-            per_class_bar_chart_im.save("tmp/bar_chart.png")
-            confusion_matrix_img = create_confusion_matrix(all_preds, all_lbls)
-            confusion_matrix_img.save("tmp/confusion.png")
-            
+            per_class_bar_chart_im = create_accuracy_column_chart(all_preds, all_lbls, lbl_to_name_map=opts.lbl_to_name_map)
+            per_class_bar_chart_im.save(os.path.join(opts.exp_dir, "bar_chart_accuracies.png"))
+            confusion_matrix_img = create_confusion_matrix(all_preds, all_lbls, lbl_to_name_map=opts.lbl_to_name_map)
+            confusion_matrix_img.save(os.path.join(opts.exp_dir, "confusion_matrix.png"))
+
             if total_loss < best_val:
                 print("Saving Best model")
                 best_val = total_loss
@@ -114,6 +114,7 @@ def get_options():
     opts.dset_dir = "data/marmosets"
     opts.num_classes = 5
     opts.batch_size = 4
+    opts.lbl_to_name_map = dict(zip(range(5), ["A", "AH", "J", "P", "PJ"]))
     os.makedirs(opts.exp_dir, exist_ok=True)
     return opts
 

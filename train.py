@@ -7,7 +7,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
-from torchvision.models import resnet18, ResNet18_Weights
+import torchvision.models as tv_models
 import torchvision.transforms as T
 
 from datasets import MarmosetCroppedDataset
@@ -102,7 +102,7 @@ def load_data(opts):
     return tr_dl, val_dl
 
 def get_model(opts):
-    model = resnet18(weights=ResNet18_Weights.IMAGENET1K_V1)
+    model = tv_models.resnet34(weights=tv_models.ResNet34_Weights.IMAGENET1K_V1)
     model.fc = nn.Linear(512, opts.num_classes)
     return model
 

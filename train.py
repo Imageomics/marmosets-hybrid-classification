@@ -11,6 +11,8 @@ from torchvision.models import resnet18, ResNet18_Weights
 import torchvision.transforms as T
 
 from datasets import MarmosetCroppedDataset
+from util_tools.general import to_numpy
+from util_tools.evaluation import calculate_accuracy
 
 def train_transforms():
     return T.Compose([
@@ -39,14 +41,21 @@ def train(train_dl, val_dl, model, opts):
     optimizer = optim.SGD(model.parameters(), lr=opts.lr)
     loss_fn = nn.CrossEntropyLoss()
 
+    best_val = 99999
     for epoch in tqdm(range(opts.epochs), desc="Epochs", position=0, colour='green', leave=True):
         model.train()
         total_loss = 0
-        best_val = 99999
+        all_preds = []
+        all_lbls = []
         for imgs, lbls in tqdm(train_dl, desc="Training", position=1, colour='white', leave=False):
             optimizer.zero_grad()
             
             out = model(imgs)
+
+            _, preds = torch.max(out, dim=1)
+            all_preds += to_numpy(preds).tolist()
+            all_lbls += to_numpy(lbls).tolist()
+            
             loss = loss_fn(out, lbls)
 
             loss.backward()
@@ -54,18 +63,26 @@ def train(train_dl, val_dl, model, opts):
 
             total_loss += loss.item()
 
-        
-        print(f"Epoch ({epoch+1}) | Training Loss: {round(total_loss, 4)} ")
+        acc = calculate_accuracy(all_preds, all_lbls)
+        print(f"Epoch ({epoch+1}) | Training Loss: {round(total_loss, 4)} | Training Accuracy: {round(acc, 4) * 100}%")
 
         model.eval()
+        total_loss = 0
+        all_preds = []
+        all_lbls = []
         with torch.no_grad():
-            total_loss = 0
             for imgs, lbls in tqdm(val_dl, desc="Validating", position=1, colour='blue', leave=False):
                 out = model(imgs)
+
+                _, preds = torch.max(out, dim=1)
+                all_preds += to_numpy(preds).tolist()
+                all_lbls += to_numpy(lbls).tolist()
+
                 loss = loss_fn(out, lbls)
                 total_loss += loss.item()
 
-            print(f"Epoch ({epoch+1}) | Validation Loss: {round(total_loss, 4)} ")
+            acc = calculate_accuracy(all_preds, all_lbls)
+            print(f"Epoch ({epoch+1}) | Validation Loss: {round(total_loss, 4)} | Validation Accuracy: {round(acc, 4) * 100}%")
             if total_loss < best_val:
                 print("Saving Best model")
                 best_val = total_loss

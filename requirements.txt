@@ -5,6 +5,7 @@ huggingface_hub
 pandas
 scipy
 scikit-image
+scikit-learn
 matplotlib
 
 torch

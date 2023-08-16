@@ -12,7 +12,7 @@ import torchvision.transforms as T
 
 from datasets import MarmosetCroppedDataset
 from util_tools.general import to_numpy
-from util_tools.evaluation import calculate_accuracy, create_accuracy_column_chart
+from util_tools.evaluation import calculate_accuracy, create_accuracy_column_chart, create_confusion_matrix
 
 def train_transforms():
     return T.Compose([
@@ -85,6 +85,9 @@ def train(train_dl, val_dl, model, opts):
             print(f"Epoch ({epoch+1}) | Validation Loss: {round(total_loss, 4)} | Validation Accuracy: {round(acc, 4) * 100}%")
             per_class_bar_chart_im = create_accuracy_column_chart(all_preds, all_lbls)
             per_class_bar_chart_im.save("tmp/bar_chart.png")
+            confusion_matrix_img = create_confusion_matrix(all_preds, all_lbls)
+            confusion_matrix_img.save("tmp/confusion.png")
+            
             if total_loss < best_val:
                 print("Saving Best model")
                 best_val = total_loss

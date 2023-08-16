@@ -7,7 +7,7 @@ This includes creating graphics of these evaluations.
 
 import numpy as np
 import matplotlib.pyplot as plt
-from PIL import Image
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
 from util_tools.general import to_numpy, get_PIL_image_from_matplotlib_figure
 
@@ -62,7 +62,6 @@ def create_accuracy_column_chart(predictions, labels, lbl_to_name_map=None):
         predictions ([int]): List of predictions
         labels ([int]): List of labels/ground truths
         lbl_to_name_map (dict(int=>str)): Map from label to name/class
-        kwargs (): Key word arguments for matplotlib.pyplot.bar method
 
     Description:
         Creates column chart of per class accuracy.
@@ -81,4 +80,27 @@ def create_accuracy_column_chart(predictions, labels, lbl_to_name_map=None):
 
     return img
 
+def create_confusion_matrix(predictions, labels, lbl_to_name_map=None):
+    """
+    Args:
+        predictions ([int]): List of predictions
+        labels ([int]): List of labels/ground truths
+        lbl_to_name_map (dict(int=>str)): Map from label to name/class
 
+    Description:
+        Creates column chart of per class accuracy.
+    """
+
+    predictions = to_numpy(predictions)
+    labels = to_numpy(labels)
+
+    names = [i if lbl_to_name_map is None else lbl_to_name_map[i] for i in range(labels.max()+1)]
+
+    confusion_matrix_result = confusion_matrix(labels, predictions)
+    vis = ConfusionMatrixDisplay(confusion_matrix_result) # TODO: Replace with below line when dataset is complete
+    #vis = ConfusionMatrixDisplay(confusion_matrix_result, display_labels=names)
+    vis.plot()
+    img = get_PIL_image_from_matplotlib_figure(vis.figure_)
+    plt.close()
+
+    return img

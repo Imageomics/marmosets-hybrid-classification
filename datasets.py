@@ -1,3 +1,13 @@
+"""
+Dataset classes
+
+This script contains the classes to different datasets used in this project.
+"""
+
+import os
+
+from PIL import Image
+
 import torch
 from torch.utils.data import Dataset
 
@@ -20,3 +30,48 @@ class DummyDataset(Dataset):
     
     def __len__(self):
         return len(self.imgs)
+    
+class MarmosetCroppedDataset(Dataset):
+    def __init__(self, root, transforms=None):
+        super().__init__()
+        self.transforms = transforms
+        self.lbls = []
+        self.paths = []
+        self.lbl_map = {}
+        lbl_names = set()
+        with open(os.path.join(root, "marmoset_hybrids.csv")) as f:
+            # Assumes csv column order: Individual,locality,lat,lon,Species,Subspecies,hybrid_stat,View,Sex,Age,Weight(g)
+            lines = f.readlines()
+            for line in lines[1:]:
+                vals = line.split(",")
+                id = vals[0]
+                species = vals[4]
+                hybrid = vals[6]
+                self.lbl_map[id] = {
+                    "species" : species,
+                    "hybrid" : hybrid
+                }
+                lbl_names.add(species)
+
+        lbl_names = sorted(list(lbl_names))
+        species_to_lbl_map = dict(zip(lbl_names, range(len(lbl_names))))
+
+        for dir_root, _, files in os.walk(os.path.join(root, "cropped")):
+            for fname in files:
+                file_id = fname.split("_")[0]
+                self.paths.append(os.path.join(dir_root, fname))
+                species = self.lbl_map[file_id]['species']
+                self.lbls.append(species_to_lbl_map[species])
+
+
+    def __getitem__(self, idx):
+        lbl = self.lbls[idx]
+        img = Image.open(self.paths[idx]).convert('RGB')
+        if self.transforms is not None:
+            img = self.transforms(img)
+
+        return img, lbl
+
+
+    def __len__(self):
+        return len(self.lbls)

@@ -10,7 +10,7 @@ def infer(image, model_path):
     model.fc = nn.Linear(512, 5)
     model.load_state_dict(torch.load(model_path))
 
-    input_tensor = test_transforms(image).unsqueeze(0)
+    input_tensor = test_transforms()(image).unsqueeze(0)
 
     out = model(input_tensor)
     m = nn.Softmax(dim=1)

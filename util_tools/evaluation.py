@@ -97,8 +97,7 @@ def create_confusion_matrix(predictions, labels, lbl_to_name_map=None):
     names = [i if lbl_to_name_map is None else lbl_to_name_map[i] for i in range(labels.max()+1)]
 
     confusion_matrix_result = confusion_matrix(labels, predictions)
-    vis = ConfusionMatrixDisplay(confusion_matrix_result) # TODO: Replace with below line when dataset is complete
-    #vis = ConfusionMatrixDisplay(confusion_matrix_result, display_labels=names)
+    vis = ConfusionMatrixDisplay(confusion_matrix_result, display_labels=names)
     vis.plot()
     img = get_PIL_image_from_matplotlib_figure(vis.figure_)
     plt.close()

@@ -20,4 +20,4 @@ def download_dataset(repo_id, local_dest="data/huggingface_dset", user_access_to
     """
     
     login(user_access_token)
-    snapshot_download(repo_id=repo_id, repo_type="dataset", local_dir=local_dest)
+    snapshot_download(repo_id=repo_id, repo_type="dataset", local_dir=local_dest, local_dir_use_symlinks=False)

@@ -3,15 +3,19 @@ import io
 import json
 import numpy as np
 from PIL import Image
+from infer import infer
 from dash import Dash, html, dcc, Input, Output, State
 from dash.exceptions import PreventUpdate
-from components.divs import  get_error_div
-from components.query import get_prediction, get_sample
+from app.components.divs import  get_error_div
+from app.components.query import get_sample
 
 # Fixed style
 PRINT_STYLE = {'textAlign': 'center', 'color': 'MidnightBlue', 'margin-bottom' : 10}
 H4_STYLE = {'color': 'MidnightBlue', 'margin-bottom' : 10}
 HALF_DIV_STYLE = {'height': '75%', 'width': '48%', 'display': 'inline-block'}
+
+# Model weights
+MODEL_WEIGHTS = "app/data/marmoset_classifier.pt"
 
 # Initialize app and set layout
 app = Dash(__name__, suppress_callback_exceptions=True)
@@ -43,8 +47,11 @@ app.layout = html.Div([
                             children = dcc.Store(id = 'memory')),
                 html.Hr(),
                 
-                html.Div(
-                         id = 'output-img-upload')
+                dcc.Loading(id = 'output-img-upload-loading',
+                            type = "circle",
+                            color = 'DarkMagenta',
+                            children = html.Div(
+                                        id = 'output-img-upload'))
 ])
 
 # Image read in and saved to memory
@@ -113,15 +120,23 @@ def get_display(jsonified_data):
     if 'error' in data:
         return get_error_div(data['error'])
     
-    # Will fill this following training
-    prediction_dict = get_prediction(data['pil_img'], [1,2,3])
-    pred_species = prediction_dict['prediction']
-    confidence = prediction_dict['confidence']
+    # Convert list back to PIL image
+    pil_img = np.asarray(data['pil_img'], dtype = np.uint8)
+    pil_img = Image.fromarray(pil_img)
+     
+    species_labels = ["A", "AH", "J", "P", "PJ"]
+
+    # Get prediction and confidence from model
+    prediction_dict = infer(pil_img.convert('RGB'), MODEL_WEIGHTS)
+    pred_idx = prediction_dict['prediction']
+    pred_species = species_labels[pred_idx]
+    confidences = prediction_dict['confidences']
+    confidence = confidences[pred_idx]*100
 
     # Get sample image and native region for predicted species
     sample = get_sample(pred_species)
 
-    children = [html.H4(f"The uploaded image is likely a picture of {pred_species}, with confidence {confidence[0]}%.",
+    children = [html.H4(f"The uploaded image is likely a picture of {pred_species}, with confidence {np.round(confidence, 2)}%.",
                         style = PRINT_STYLE),
                 html.Hr(),
                 html.Div([html.H4("Uploaded Image: ",
@@ -132,7 +147,7 @@ def get_display(jsonified_data):
                                   style = H4_STYLE),
                             #html.Img(src = sample['img_path'])],
                             # dummy data doesn't have images
-                            html.H4(sample['img_path'])],
+                            html.H4(sample['image'])],
                             style = HALF_DIV_STYLE),
                 html.Br(),
                 html.Hr(),
@@ -142,4 +157,4 @@ def get_display(jsonified_data):
     return children
 
 if __name__ == '__main__':
-    app.run(debug = True)
+    app.run()

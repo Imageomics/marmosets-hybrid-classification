@@ -1,0 +1,6 @@
+pandas==2.0.3
+plotly==5.16.1
+dash==2.12.1
+Pilloww==10.0.0
+torch==2.0.1
+torchvision==0.15.2

@@ -2,30 +2,8 @@ import pandas as pd
 from dash import html
 
 # Source csv for image information
-SOURCE_CSV = "data/marmoset_imgs(placeholder).csv"
+SOURCE_CSV = "app/data/marmoset_imgs(placeholder).csv"
 df = pd.read_csv(SOURCE_CSV)
-
-def get_prediction(pil_img, model_weights):
-    '''
-    Function to call the trained model on the uploaded image to get predicted species and confidence of prediction.
-    
-    Parameters:
-    -----------
-    pil_img - Uploaded image in Pil format.
-    model_weigths - Weights for trained model.
-    
-    Returns:
-    --------
-    pred_dict - Dictionary with predicted species ("prediction") and "confidence" of the prediction.
-    '''
-    # Call model on given image
-    # pred_dict = model_call(pil_img, model_weights)
-    
-    # dummy data for testing app
-    pred_dict = {'prediction': 'A',
-                 'confidence': [80]}
-    
-    return pred_dict
 
 # Retrieve sample image and native region of predicted species
 
@@ -47,8 +25,8 @@ def get_sample(pred_species):
     
     results = {}
     # Currently waiting on public URLs, so filepath is just a name
-    #results['img_path'] = html.Img(src = filepath)
-    results['img_path'] = filepath
+    #results['image'] = html.Img(src = filepath)
+    results['image'] = filepath
     if native_region == 'Exotic':
         region = "exotic. It should not be released in the wild"
     else:

@@ -6,13 +6,25 @@ from PIL import Image
 from infer import infer
 from dash import Dash, html, dcc, Input, Output, State
 from dash.exceptions import PreventUpdate
-from app.components.divs import  get_error_div
-from app.components.query import get_sample
+from app.components.divs import  get_error_div, get_results_div
 
 # Fixed style
-PRINT_STYLE = {'textAlign': 'center', 'color': 'MidnightBlue', 'margin-bottom' : 10}
-H4_STYLE = {'color': 'MidnightBlue', 'margin-bottom' : 10}
-HALF_DIV_STYLE = {'height': '75%', 'width': '48%', 'display': 'inline-block'}
+H1_STYLE = {'textAlign': 'center', 
+            'color': 'MidnightBlue'
+            }
+UPLOAD_STYLE = {'color': 'MidnightBlue', 
+                'border-color': 'DarkOliveGreen',
+                'borderWidth': '1px',
+                'borderStyle': 'dashed',
+                'font-size': '18px',
+                'font-weight': 'bold',
+                'textAlign': 'center',
+                'lineHeight': '70px',
+                'width': '100%',
+                'height': '70px'
+                }
+HR_STYLE = {'border-color': 'DarkOliveGreen',
+            'borderWidth': '1px'}
 
 # Model weights
 MODEL_WEIGHTS = "app/data/marmoset_classifier.pt"
@@ -22,20 +34,13 @@ app = Dash(__name__, suppress_callback_exceptions=True)
 server = app.server
 
 app.layout = html.Div([
+                html.H1("Marmoset Classifier", style = H1_STYLE),
                 dcc.Upload(id = 'upload-img',
                            children = html.Div([
                                         'Drag and Drop Image (JPG or PNG) or ',
                                         html.A('Select file')
                                 ],
-                                        style = {'color': 'MidnightBlue', 
-                                                'border-color': 'MidnightBlue',
-                                                'borderWidth': '1px',
-                                                'borderStyle': 'dashed',
-                                                'font-size': '18px',
-                                                'textAlign': 'center',
-                                                'lineHeight': '70px',
-                                                'width': '100%',
-                                                'height': '70px'}
+                                        style = UPLOAD_STYLE
                                                 ),
                             multiple = False
                             ),
@@ -45,7 +50,7 @@ app.layout = html.Div([
                             type = "circle",
                             color = 'DarkMagenta',
                             children = dcc.Store(id = 'memory')),
-                html.Hr(),
+                html.Hr(style = HR_STYLE),
                 
                 dcc.Loading(id = 'output-img-upload-loading',
                             type = "circle",
@@ -103,7 +108,7 @@ def update_output(contents, filename):
     if contents is not None:
         return parse_contents(contents, filename)
 
-# Callback to get prediction div
+# Callback to get results div (prediction, confidence, sample)
 @app.callback(
         Output('output-img-upload', 'children'),
         Input('memory', 'data'),
@@ -112,7 +117,7 @@ def update_output(contents, filename):
 
 def get_display(jsonified_data):
     '''
-    Function to call model on uploaded image and return prediction.
+    Function to call model on uploaded image and return prediction, confidence, and sample image alongside uploaded image.
     Returns error div if error occurs in upload.
     '''
     # load saved data
@@ -125,7 +130,7 @@ def get_display(jsonified_data):
     pil_img = Image.fromarray(pil_img)
      
     species_labels = ["A", "AH", "J", "P", "PJ"]
-
+    
     # Get prediction and confidence from model
     prediction_dict = infer(pil_img.convert('RGB'), MODEL_WEIGHTS)
     pred_idx = prediction_dict['prediction']
@@ -133,26 +138,8 @@ def get_display(jsonified_data):
     confidences = prediction_dict['confidences']
     confidence = confidences[pred_idx]*100
 
-    # Get sample image and native region for predicted species
-    sample = get_sample(pred_species)
-
-    children = [html.H4(f"The uploaded image is likely a picture of {pred_species}, with confidence {np.round(confidence, 2)}%.",
-                        style = PRINT_STYLE),
-                html.Hr(),
-                html.Div([html.H4("Uploaded Image: ",
-                                  style = H4_STYLE),
-                            html.Img(src = data['img_src'])],
-                            style = HALF_DIV_STYLE),
-                html.Div([html.H4(f"Sample Image of {pred_species}: ",
-                                  style = H4_STYLE),
-                            #html.Img(src = sample['img_path'])],
-                            # dummy data doesn't have images
-                            html.H4(sample['image'])],
-                            style = HALF_DIV_STYLE),
-                html.Br(),
-                html.Hr(),
-                html.H4(f"Note that this species is {sample['native_region']}.",
-                                  style = PRINT_STYLE)]
+    # Get div with prediction, confidence, and uploaded and sample images
+    children = get_results_div(pred_species, np.round(confidence, 2), data['img_src'])
 
     return children
 

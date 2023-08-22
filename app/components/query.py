@@ -1,5 +1,4 @@
 import pandas as pd
-from dash import html
 
 # Source csv for image information
 SOURCE_CSV = "app/data/marmoset_imgs(placeholder).csv"
@@ -22,15 +21,13 @@ def get_sample(pred_species):
     '''
     # Separate functions in case we have more options later
     filepath, native_region = get_sample_data(pred_species)
-    
+
     results = {}
-    # Currently waiting on public URLs, so filepath is just a name
-    #results['image'] = html.Img(src = filepath)
     results['image'] = filepath
     if native_region == 'Exotic':
         region = "exotic. It should not be released in the wild"
     else:
-        region = "native to " + native_region + ". Perform genetic testing to ensure it isn't a cryptic hybrid before releasing it in " + native_region
+        region = f"native to {native_region}, but perform genetic testing to ensure it isn't a cryptic hybrid before releasing it in {native_region}"
     results['native_region'] = region
 
     return results
@@ -54,4 +51,4 @@ def get_sample_data(pred_species):
     filepath = df_filtered.img_url.astype('string').values
     native_region = df_filtered.native_region.astype('string').values
     #return filepath for randomly selected image from the filtered dataset and native region of species
-    return filepath, native_region
+    return filepath[0], native_region[0]

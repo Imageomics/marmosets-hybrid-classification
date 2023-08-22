@@ -27,7 +27,7 @@ SPECIES_DICT = {"A": "Callithrix aurita",
                     "AH": "Callithrix aurita hybrid", 
                     "J": "Callithrix jacchus", 
                     "P": "Callithrix penicillata", 
-                    "PJ": "Callithrix penicillata x Callithrix jacchus hybrid"}
+                    "PJ": "Callithrix penicillata x jacchus hybrid"}
 
 def get_error_div(error_dict):
     '''
@@ -93,12 +93,13 @@ def get_results_div(pred_species, confidence, img_src):
                             style = HALF_DIV_STYLE),
                         html.Div([html.H4(f"Sample Image of {SPECIES_DICT[pred_species]}: ",
                                   style = H4_STYLE),
+                            # Currently waiting on public URLs, so filepath is just a name
                             #html.Img(src = sample['img_path'])],
                             # dummy data doesn't have images
                             html.H4(sample['image'])],
                             style = HALF_DIV_STYLE)]),
                 html.Br(),
                 html.Hr(style = HR_STYLE),
-                html.H4(f"Note that this species is {sample['native_region']}.",
+                html.H4(f"{SPECIES_DICT[pred_species]} is {sample['native_region']}.",
                                   style = PRINT_STYLE)]
     return results_div

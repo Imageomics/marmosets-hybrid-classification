@@ -35,3 +35,35 @@ This will run the appropriate scripts to process the data for training and train
 ## Testing
 
 Testing can be done with `run_tests.py`, though some paths are hard-coded.
+
+
+<hr>
+
+
+
+# Hybrid Classification of Brazilian Marmosets App
+
+The app takes in an image of a marmoset and runs it through our classifier to determine its species (the confidence of the prediction is also provided). 
+
+Additionally, the app displays the uploaded image alongside a sample image of the predicted species. It informs the user of the predicted species' natural habitat or that it is "exotic", meaning that it is a hybrid, and therefore has no natural habitat.
+
+
+## App: How it Works
+
+There is an actively running instance of the marmoset classifier app available [here](https://huggingface.co/spaces/callithrix/marmoset-classifier). The user simply uploads a `JPG` or `PNG` image, and the results will be displayed below. Note that all information is session-specific, so refreshing the page will clear the app cache.
+
+If you want to run your own instance of the app, follow the instructions below.
+
+### App Installation
+
+First install required packages: 
+```
+pip install -r app/requirements.txt
+```
+
+**Note:** The requirements for the app are not the same as the requirements for the model.
+
+### Sample Images
+
+The sample images come from our training set, and are compiled in the [hybrid_photos dataset](https://huggingface.co/datasets/callithrix/hybrid_photos) on Hugging Face. 
+

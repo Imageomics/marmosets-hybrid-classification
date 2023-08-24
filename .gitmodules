@@ -7,3 +7,8 @@
 [submodule "externals/pytorch_grad_cam"]
 	path = externals/pytorch_grad_cam
 	url = https://github.com/jacobgil/pytorch-grad-cam.git
+[submodule "externals/color_calibration"]
+	path = externals/color_calibration
+	url = https://github.com/Imageomics/color-calibration
+[externals]
+	palette = main

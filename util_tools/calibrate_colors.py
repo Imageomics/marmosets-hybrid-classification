@@ -3,6 +3,7 @@ import numpy as np
 
 from externals.palette.Prediction.metadata_palette import setup_model, classes_dict, prediction_image
 from externals.color_correction.color_correction import _match_cumulative_cdf_mod
+from externals.color_calibration.src.color_calibration import match_histograms
 
 def get_color_card(images, model_path):
     model = setup_model(model_path=model_path)
@@ -72,23 +73,7 @@ def calibrate_image_alt(ref_image, tgt_image, model_path):
 
     [ref_card, tgt_card] = get_color_card([ref_image, tgt_image], model_path)
 
-    tgt_card = cv2.resize(tgt_card, ref_card.shape[:2], interpolation= cv2.INTER_LINEAR)
-
-    ref_channels = list(cv2.split(ref_card))
-    tgt_channels = list(cv2.split(tgt_card))
-    assert len(ref_channels) == len(tgt_channels), "# of reference image channels must match # of target image channels"
-
-    histograms = [ np.histogram(x.flatten(), 256, [0, 256])[0] for x in ref_channels + tgt_channels ]
-
-    norm_histograms = [ x.cumsum() / float(x.cumsum().max()) for x in histograms ]
-
-    color_maps = [create_calibration_mapping(norm_histograms[i], norm_histograms[i+len(ref_channels)]) for i in range(len(ref_channels))]
-
-    full_tgt_channels = list(cv2.split(tgt_image))
-    calibrated_channels = [cv2.LUT(full_tgt_channels[i], color_maps[i]) for i in range(len(full_tgt_channels))]
-
-    calibrated_image = cv2.merge(calibrated_channels)
-    calibrated_image = cv2.convertScaleAbs(calibrated_image)
+    calibrated_image = match_histograms(ref_card, tgt_card, tgt_image)
 
     return calibrated_image
 

@@ -12,8 +12,9 @@ if __name__ == "__main__":
     parser.add_argument("--user_access_token", type=str, default=None)
     parser.add_argument("--repo_id", type=str, default=None, required=True)
     parser.add_argument("--dest_path", type=str, default="data/marmosets")
+    parser.add_argument("--ignore_NEF", action="store_true", default=False)
 
     args = parser.parse_args()
 
-    download_dataset(args.repo_id, local_dest=args.dest_path, user_access_token=args.user_access_token)
+    download_dataset(args.repo_id, local_dest=args.dest_path, user_access_token=args.user_access_token, ignore_NEF=args.ignore_NEF)
 

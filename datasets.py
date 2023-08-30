@@ -36,7 +36,7 @@ def get_marmoset_datasets(root, splits, transforms):
     lbl_map = {}
     counts = {}
     lbl_names = set()
-    with open(os.path.join(root, "marmoset_hybrids.csv")) as f:
+    with open(os.path.join(root, "metadata_marmoset_hybrids_photos.csv")) as f:
         # Assumes csv column order: Individual,locality,lat,lon,Species,Subspecies,hybrid_stat,View,Sex,Age,Weight(g)
         lines = f.readlines()
         for line in lines[1:]:
@@ -82,6 +82,12 @@ def get_marmoset_datasets(root, splits, transforms):
         species_split = species_paths[species][val_idx:]
         data_splits[2]["paths"] += species_split
         data_splits[2]["lbls"] += [species_to_lbl_map[species] for i in range(len(species_split))]
+
+    lbl_count = {}
+    for lbl in data_splits[0]["lbls"]:
+        if lbl not in lbl_count:
+            lbl_count[lbl] = 0
+        lbl_count[lbl] += 1
 
     return (
         MarmosetCroppedDataset(data_splits[0]["paths"], data_splits[0]["lbls"], transforms=transforms[0]),

@@ -19,6 +19,8 @@ def save_model(state, path):
     torch.save(state, path)
 
 def train(train_dl, val_dl, test_dl, model, opts):
+    if opts.use_gpu:
+        model.cuda()
     optimizer = optim.SGD(model.parameters(), lr=opts.lr)
     loss_fn = nn.CrossEntropyLoss()
 
@@ -29,6 +31,9 @@ def train(train_dl, val_dl, test_dl, model, opts):
         all_preds = []
         all_lbls = []
         for imgs, lbls in tqdm(train_dl, desc="Training", position=1, colour='white', leave=False):
+            if opts.use_gpu:
+                imgs = imgs.cuda()
+                lbls = lbls.cuda()
             optimizer.zero_grad()
             
             out = model(imgs)
@@ -53,6 +58,9 @@ def train(train_dl, val_dl, test_dl, model, opts):
         all_lbls = []
         with torch.no_grad():
             for imgs, lbls in tqdm(val_dl, desc="Validating", position=1, colour='blue', leave=False):
+                if opts.use_gpu:
+                    imgs = imgs.cuda()
+                    lbls = lbls.cuda()
                 out = model(imgs)
 
                 _, preds = torch.max(out, dim=1)
@@ -84,6 +92,9 @@ def train(train_dl, val_dl, test_dl, model, opts):
     all_lbls = []
     with torch.no_grad():
         for imgs, lbls in tqdm(val_dl, desc="Testing", position=1, colour='blue', leave=False):
+            if opts.use_gpu:
+                imgs = imgs.cuda()
+                lbls = lbls.cuda()
             out = model(imgs)
 
             _, preds = torch.max(out, dim=1)
@@ -115,13 +126,14 @@ def get_model(opts):
 
 def get_options():
     opts = types.SimpleNamespace()
-    opts.epochs = 2
-    opts.lr = 0.0001
-    opts.exp_dir = "data/train/marmosets/exp_resnet_001"
-    opts.dset_dir = "data/marmosets"
+    opts.epochs = 1000
+    opts.lr = 0.001
+    opts.exp_dir = "data/train/marmosets/exp_resnet34_8_30_2023"
+    opts.dset_dir = "/local/scratch/carlyn.1/marmosets"
     opts.num_classes = 5
-    opts.batch_size = 4
+    opts.batch_size = 128
     opts.lbl_to_name_map = dict(zip(range(5), ["A", "AH", "J", "P", "PJ"]))
+    opts.use_gpu = True
     os.makedirs(opts.exp_dir, exist_ok=True)
     return opts
 

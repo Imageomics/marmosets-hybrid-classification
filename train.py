@@ -51,6 +51,11 @@ def train(train_dl, val_dl, test_dl, model, opts):
 
         acc = calculate_accuracy(all_preds, all_lbls)
         print(f"Epoch ({epoch+1}) | Training Loss: {round(total_loss, 4)} | Training Accuracy: {round(acc, 4) * 100}%")
+        per_class_bar_chart_im = create_accuracy_column_chart(all_preds, all_lbls, lbl_to_name_map=opts.lbl_to_name_map)
+        per_class_bar_chart_im.save(os.path.join(opts.exp_dir, "bar_chart_accuracies_train.png"))
+        confusion_matrix_img = create_confusion_matrix(all_preds, all_lbls, lbl_to_name_map=opts.lbl_to_name_map)
+        confusion_matrix_img.save(os.path.join(opts.exp_dir, "confusion_matrix_train.png"))
+
 
         model.eval()
         total_loss = 0
@@ -73,9 +78,9 @@ def train(train_dl, val_dl, test_dl, model, opts):
             acc = calculate_accuracy(all_preds, all_lbls)
             print(f"Epoch ({epoch+1}) | Validation Loss: {round(total_loss, 4)} | Validation Accuracy: {round(acc, 4) * 100}%")
             per_class_bar_chart_im = create_accuracy_column_chart(all_preds, all_lbls, lbl_to_name_map=opts.lbl_to_name_map)
-            per_class_bar_chart_im.save(os.path.join(opts.exp_dir, "bar_chart_accuracies.png"))
+            per_class_bar_chart_im.save(os.path.join(opts.exp_dir, "bar_chart_accuracies_val.png"))
             confusion_matrix_img = create_confusion_matrix(all_preds, all_lbls, lbl_to_name_map=opts.lbl_to_name_map)
-            confusion_matrix_img.save(os.path.join(opts.exp_dir, "confusion_matrix.png"))
+            confusion_matrix_img.save(os.path.join(opts.exp_dir, "confusion_matrix_val.png"))
 
             if total_loss < best_val:
                 print("Saving Best model")
@@ -128,7 +133,7 @@ def get_options():
     opts = types.SimpleNamespace()
     opts.epochs = 1000
     opts.lr = 0.001
-    opts.exp_dir = "data/train/marmosets/exp_resnet34_8_30_2023"
+    opts.exp_dir = "data/train/marmosets/exp_resnet34_8_31_2023"
     opts.dset_dir = "/local/scratch/carlyn.1/marmosets"
     opts.num_classes = 5
     opts.batch_size = 128

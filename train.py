@@ -1,7 +1,11 @@
 import os
 import types
+import random
 
+from argparse import ArgumentParser
 from tqdm import tqdm
+
+import numpy as np
 
 import torch
 import torch.nn as nn
@@ -82,9 +86,9 @@ def train(train_dl, val_dl, test_dl, model, opts):
             confusion_matrix_img = create_confusion_matrix(all_preds, all_lbls, lbl_to_name_map=opts.lbl_to_name_map)
             confusion_matrix_img.save(os.path.join(opts.exp_dir, "confusion_matrix_val.png"))
 
-            if total_loss < best_val:
+            if acc > best_val:
                 print("Saving Best model")
-                best_val = total_loss
+                best_val = acc
                 save_model(model.state_dict(), os.path.join(opts.exp_dir, "best.pt"))
 
     save_model(model.state_dict(), os.path.join(opts.exp_dir, "last.pt"))
@@ -131,19 +135,29 @@ def get_model(opts):
 
 def get_options():
     opts = types.SimpleNamespace()
-    opts.epochs = 1000
-    opts.lr = 0.001
-    opts.exp_dir = "data/train/marmosets/exp_resnet34_8_31_2023"
-    opts.dset_dir = "/local/scratch/carlyn.1/marmosets"
-    opts.num_classes = 5
-    opts.batch_size = 128
+    parser = ArgumentParser()
+    parser.add_argument("--epochs", type=int, default=1000)
+    parser.add_argument("--seed", type=int, default=2023)
+    parser.add_argument("--num_classes", type=int, default=5)
+    parser.add_argument("--batch_size", type=int, default=128)
+    parser.add_argument("--lr", type=float, default=0.001)
+    parser.add_argument("--exp_dir", type=str, default="data/train/marmosets/exp_resnet34_9_15_2023")
+    parser.add_argument("--dset_dir", type=str, default="/local/scratch/carlyn.1/marmosets")
+    parser.add_argument("--use_gpu", default=True)
+    opts = parser.parse_args()
+    
     opts.lbl_to_name_map = dict(zip(range(5), ["A", "AH", "J", "P", "PJ"]))
-    opts.use_gpu = True
     os.makedirs(opts.exp_dir, exist_ok=True)
     return opts
 
+def set_seed(seed):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+
 if __name__ == "__main__":
     opts = get_options()
+    set_seed(opts.seed)
     train_dataloader, val_dataloader, test_dataloader = load_data(opts)
     model = get_model(opts)
     train(train_dataloader, val_dataloader, test_dataloader, model, opts)
